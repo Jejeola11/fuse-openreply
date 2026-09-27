@@ -265,19 +265,25 @@ export default function CampaignDetailPage() {
           <Summary title={t("The exact link sent")}>
             {campaign.trackedLinks
               ?.filter((link) => link.destinationUrl)
-              .map((link, i) => (
-                <div key={i} className="space-y-1">
-                  <div className="rounded border border-border bg-surface px-3 py-2">
-                    <p className="select-all break-all font-mono text-xs text-foreground">
-                      {link.trackedUrl ?? link.destinationUrl}
+              .map((link, i) => {
+                const buttonLabel =
+                  i === 0 ? campaign.linkButtonLabel : link.label;
+
+                return (
+                  <div key={i} className="space-y-1">
+                    <div className="rounded border border-border bg-surface px-3 py-2">
+                      <p className="select-all break-all font-mono text-xs text-foreground">
+                        {link.trackedUrl ?? link.destinationUrl}
+                      </p>
+                    </div>
+                    <p className="text-xs text-muted">
+                      {buttonLabel ? `${buttonLabel} · ` : ""}
+                      {t("redirects to")} {" "}
+                      <span className="break-all">{link.destinationUrl}</span>
                     </p>
                   </div>
-                  <p className="text-xs text-muted">
-                    {link.label ? `${link.label} · ` : ""}{t("redirects to")}{" "}
-                    <span className="break-all">{link.destinationUrl}</span>
-                  </p>
-                </div>
-              ))}
+                );
+              })}
           </Summary>
         )}
 
