@@ -68,7 +68,7 @@ type StoredLink = { id: string; position: number };
  * Positions are then renumbered to match the result, which closes the gap a
  * removed link leaves and repairs links an older build wrote without one.
  *
- * Call it in the same transaction as the campaign update, after it. That
+ * A link save must only ever write the corresponding button slot; it must never\n * use another campaign link as a fallback destination. Call it in the same\n * transaction as the campaign update, after it. That
  * update locks the campaign row until the transaction ends, so two saves of
  * one campaign run one after the other and cannot both create the same
  * missing link.
