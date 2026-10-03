@@ -186,6 +186,7 @@ model Automation {
   // postId / matchAnyPost do not apply to it.
   dmTriggerEnabled Boolean @default(false)
   dmMessage      String
+  voiceNoteUrl   String?
   openingDmEnabled     Boolean @default(false)
   openingDmMessage     String?
   openingDmButtonLabel String?
