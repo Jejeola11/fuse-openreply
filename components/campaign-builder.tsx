@@ -39,6 +39,7 @@ interface LoadedCampaign {
   matchAnyWord: boolean;
   dmTriggerEnabled: boolean;
   dmMessage: string;
+  voiceNoteUrl: string | null;
   openingDmEnabled: boolean;
   openingDmMessage: string | null;
   openingDmButtonLabel: string | null;
@@ -169,6 +170,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
   const [openingDmButtonLabel, setOpeningDmButtonLabel] = useState("");
 
   const [dmMessage, setDmMessage] = useState("");
+  const [voiceNoteUrl, setVoiceNoteUrl] = useState("");
   const [linkOpen, setLinkOpen] = useState(false);
   const [trackedDestinationUrl, setTrackedDestinationUrl] = useState("");
   const [linkButtonLabel, setLinkButtonLabel] = useState("Open link");
@@ -273,6 +275,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
         setOpeningDmMessage(c.openingDmMessage ?? "");
         setOpeningDmButtonLabel(c.openingDmButtonLabel ?? "");
         setDmMessage(c.dmMessage);
+        setVoiceNoteUrl(c.voiceNoteUrl ?? "");
         setLinkButtonLabel(c.linkButtonLabel ?? "Open link");
         setIsActive(c.isActive);
         const link = c.trackedLinks?.[0]?.destinationUrl ?? "";
@@ -410,6 +413,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
       keywords: matchMode === "any" ? [] : keywords,
       dmTriggerEnabled,
       dmMessage,
+      voiceNoteUrl: voiceNoteUrl.trim() || "",
       openingDmEnabled,
       openingDmMessage: openingDmEnabled ? openingDmMessage : null,
       openingDmButtonLabel: openingDmEnabled ? openingDmButtonLabel : null,
@@ -927,6 +931,11 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
             <p className="text-xs text-muted">
               {"{link}"} {t("inserts the tracked link;")} {"{username}"} {t("personalizes.")}
             </p>
+            <div className="mt-3 rounded-lg border border-border bg-surface/50 p-3 space-y-2">
+              <label className="text-sm text-foreground">Optional voice note URL</label>
+              <input value={voiceNoteUrl} onChange={(e) => setVoiceNoteUrl(e.target.value)} placeholder="https://your-public-audio-url.com/voice-note.mp3" type="url" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-zinc-500 focus:border-accent/40 focus:outline-none" />
+              <p className="text-xs text-muted">Paste a public HTTPS MP3/M4A URL. OpenReply sends it after the text DM. Direct Meta connection is required; Zernio voice delivery is not supported yet.</p>
+            </div>
           </div>
           <div className="mt-3 rounded-lg border border-border p-3">
             <div className="flex items-center justify-between">
