@@ -22,7 +22,9 @@ import {
   sendDirectMessage,
   sendDirectMessageWithButton,
   sendDirectMessageWithLinkButton,
+  sendDirectMessageWithAudio,
   sendPrivateReply,
+  sendPrivateReplyWithAudio,
   sendPrivateReplyWithButton,
   sendPrivateReplyWithLinkButton,
 } from "@/lib/instagram/provider";
@@ -129,6 +131,7 @@ function buildInlineLinkFallback(
 
 type RevealAutomation = {
   dmMessage: string;
+  voiceNoteUrl: string | null;
   linkButtonLabel: string | null;
   trackedLinks: WorkerTrackedLink[];
   instagramAccount: { instagramId: string };
@@ -163,6 +166,7 @@ async function sendRevealDirectMessage({
         trackedLinks: automation.trackedLinks,
       }),
     });
+    if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: automation.voiceNoteUrl });
     return;
   }
 
@@ -210,6 +214,7 @@ async function sendRevealDirectMessage({
       throw buttonError;
     }
   }
+  if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: automation.voiceNoteUrl });
 }
 
 
@@ -698,6 +703,15 @@ async function processComment(job: Job<ProcessCommentJob>): Promise<void> {
           commentId: commentId,
           message: dmMessage,
           postId: mediaId,
+        });
+      }
+
+      if (automation.voiceNoteUrl) {
+        await sendPrivateReplyWithAudio({
+          context: accessToken,
+          instagramAccountId: automation.instagramAccount.instagramId,
+          commentId,
+          audioUrl: automation.voiceNoteUrl,
         });
       }
 
