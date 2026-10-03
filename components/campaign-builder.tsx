@@ -171,6 +171,8 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
 
   const [dmMessage, setDmMessage] = useState("");
   const [voiceNoteUrl, setVoiceNoteUrl] = useState("");
+  const [voiceNoteUploading, setVoiceNoteUploading] = useState(false);
+  const [voiceNoteName, setVoiceNoteName] = useState("");
   const [linkOpen, setLinkOpen] = useState(false);
   const [trackedDestinationUrl, setTrackedDestinationUrl] = useState("");
   const [linkButtonLabel, setLinkButtonLabel] = useState("Open link");
@@ -932,9 +934,11 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
               {"{link}"} {t("inserts the tracked link;")} {"{username}"} {t("personalizes.")}
             </p>
             <div className="mt-3 rounded-lg border border-border bg-surface/50 p-3 space-y-2">
-              <label className="text-sm text-foreground">Optional voice note URL</label>
+              <label className="text-sm text-foreground">Optional voice note</label>
+              <input type="file" accept="audio/mpeg,audio/wav,audio/x-wav,audio/wave,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a" disabled={voiceNoteUploading} onChange={async (e) => { const file=e.target.files?.[0]; if (!file) return; setVoiceNoteUploading(true); try { const body=new FormData(); body.append("file",file); const res=await fetch("/api/voice-notes",{method:"POST",body}); const data=await res.json(); if (!res.ok) throw new Error(data.error||"Upload failed"); setVoiceNoteUrl(data.url); setVoiceNoteName(data.name); } catch (error) { setError(error instanceof Error ? error.message : "Voice-note upload failed"); } finally { setVoiceNoteUploading(false); } }} className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-background" />
+              {voiceNoteName && <p className="text-xs text-accent">{voiceNoteUploading ? "Uploading…" : `Attached: ${voiceNoteName}`}</p>}
               <input value={voiceNoteUrl} onChange={(e) => setVoiceNoteUrl(e.target.value)} placeholder="https://your-public-audio-url.com/voice-note.mp3" type="url" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-zinc-500 focus:border-accent/40 focus:outline-none" />
-              <p className="text-xs text-muted">Paste a public HTTPS MP3/M4A URL. OpenReply sends it after the text DM. Direct Meta connection is required; Zernio voice delivery is not supported yet.</p>
+              <p className="text-xs text-muted">Upload an MP3, WAV, or M4A up to 10 MB, or paste a public HTTPS audio URL. OpenReply sends it after the text DM. Direct Meta connection is required.</p>
             </div>
           </div>
           <div className="mt-3 rounded-lg border border-border p-3">
