@@ -216,6 +216,16 @@ export async function sendDirectMessage({
   return sendZernioMessage({ context, recipientId: userId, text: message });
 }
 
+export async function sendDirectMessageWithAudio({ context, instagramAccountId, userId, audioUrl }: { context: InstagramContext; instagramAccountId: string; userId: string; audioUrl: string }) {
+  if (context.provider !== "META") throw new Error("Voice notes currently require a direct Meta Instagram connection.");
+  return meta.sendDirectMessageWithAudio(context.accessToken, instagramAccountId, userId, audioUrl);
+}
+
+export async function sendPrivateReplyWithAudio({ context, instagramAccountId, commentId, audioUrl }: { context: InstagramContext; instagramAccountId: string; commentId: string; audioUrl: string }) {
+  if (context.provider !== "META") throw new Error("Voice notes currently require a direct Meta Instagram connection.");
+  return meta.sendPrivateReplyWithAudio(context.accessToken, instagramAccountId, commentId, audioUrl);
+}
+
 export async function sendDirectMessageWithLinkButton({
   context,
   instagramAccountId,
