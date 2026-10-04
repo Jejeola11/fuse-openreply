@@ -533,7 +533,7 @@ export default function CampaignPreview(props: CampaignPreviewProps) {
             openingDmMessage={props.openingDmMessage}
             openingDmButtonLabel={props.openingDmButtonLabel}
             revealMessage={props.revealMessage}
-            hasVoiceNote={props.hasVoiceNote}
+            hasVoiceNote={props.hasVoiceNote ?? false}
             hasLink={props.hasLink}
             linkButtonLabel={props.linkButtonLabel}
             hasSecondLink={props.hasSecondLink}
@@ -556,7 +556,7 @@ export default function CampaignPreview(props: CampaignPreviewProps) {
             openingDmMessage=""
             openingDmButtonLabel=""
             revealMessage={props.revealMessage}
-            hasVoiceNote={props.hasVoiceNote}
+            hasVoiceNote={props.hasVoiceNote ?? false}
             hasLink={props.hasLink}
             linkButtonLabel={props.linkButtonLabel}
             hasSecondLink={props.hasSecondLink}
