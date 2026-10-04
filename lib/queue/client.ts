@@ -85,7 +85,7 @@ let dmQueue: Queue<DmQueueJob> | null = null;
 export function getDMQueue(): Queue<DmQueueJob> {
   if (!dmQueue) {
     dmQueue = new Queue<DmQueueJob>("dm-processing", {
-      connection: getRedisConnection(),
+      connection: getRedisConnection() as never,
       defaultJobOptions: {
         removeOnComplete: { count: 1000 }, // Keep last 1000 completed jobs
         // Clear failed jobs shortly after they exhaust retries. Job ids are
