@@ -100,7 +100,7 @@ export function getDMQueue(): Queue<DmQueueJob> {
           type: "custom",
         },
       },
-    });
+    }) as Queue<DmQueueJob>;
   }
   return dmQueue;
 }
