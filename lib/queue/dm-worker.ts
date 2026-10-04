@@ -46,6 +46,7 @@ import {
   renderMessageWithoutLink,
 } from "@/lib/tracking/message";
 import { TRACKED_LINK_ORDER } from "@/lib/tracking/link-order";
+import { getInstagramCompatibleAudioUrl } from "@/lib/media/instagram-audio";
 
 import {
   ZernioApiError,
@@ -166,7 +167,7 @@ async function sendRevealDirectMessage({
         trackedLinks: automation.trackedLinks,
       }),
     });
-    if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: automation.voiceNoteUrl });
+    if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl) });
     return;
   }
 
@@ -214,7 +215,7 @@ async function sendRevealDirectMessage({
       throw buttonError;
     }
   }
-  if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: automation.voiceNoteUrl });
+  if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl) });
 }
 
 
@@ -711,7 +712,7 @@ async function processComment(job: Job<ProcessCommentJob>): Promise<void> {
           context: accessToken,
           instagramAccountId: automation.instagramAccount.instagramId,
           commentId,
-          audioUrl: automation.voiceNoteUrl,
+          audioUrl: await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl),
         });
       }
 
