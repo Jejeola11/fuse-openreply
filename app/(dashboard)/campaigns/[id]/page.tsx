@@ -262,7 +262,17 @@ export default function CampaignDetailPage() {
           )}
         </Summary>
 
-        {campaign.voiceNoteUrl && (\n          <Summary title={t("Voice note attached")}>\n            <div className="rounded border border-success/30 bg-success/5 p-3">\n              <p className="mb-2 text-sm font-medium text-success">✓ Voice note will be sent after the DM</p>\n              <audio controls preload="metadata" src={campaign.voiceNoteUrl} className="h-9 w-full" />\n            </div>\n          </Summary>\n        )}\n\n        {hasLink && (\n          <Summary title={t("The exact link sent")}>
+        {campaign.voiceNoteUrl && (
+          <Summary title={t("Voice note attached")}>
+            <div className="rounded border border-success/30 bg-success/5 p-3">
+              <p className="mb-2 text-sm font-medium text-success">✓ Voice note will be sent after the DM</p>
+              <audio controls preload="metadata" src={campaign.voiceNoteUrl} className="h-9 w-full" />
+            </div>
+          </Summary>
+        )}
+
+        {hasLink && (
+          <Summary title={t("The exact link sent")}>
             {campaign.trackedLinks
               ?.filter((link) => link.destinationUrl)
               .map((link, i) => {
