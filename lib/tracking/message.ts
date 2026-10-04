@@ -9,6 +9,19 @@ function trimTrailingPunctuation(url: string) {
   return url.replace(/[.,!?;:]+$/, "");
 }
 
+function firstNameFromInstagramUsername(username?: string | null) {
+  const normalized = username?.trim().replace(/^@/, "") ?? "";
+  const firstPart = normalized.split(/[._\-\s]+/)[0] ?? "";
+
+  if (!firstPart) return "there";
+  return firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
+}
+
+function personalizeMessage(message: string, commenterName?: string | null) {
+  const firstName = firstNameFromInstagramUsername(commenterName);
+  return message.replace(/\{(?:username|first_name)\}/gi, firstName);
+}
+
 export function extractFirstUrl(message: string): string | null {
   const match = message.match(URL_PATTERN);
   if (!match) return null;
@@ -35,8 +48,8 @@ export function replaceUrlWithTrackedPlaceholder(
 }
 
 /**
- * Personalize {username} and strip the {link} token — used when the link is
- * delivered as a separate button rather than inline in the message text.
+ * Personalize {username}/{first_name} and strip the {link} token — used when
+ * the link is delivered as a separate button rather than inline in the text.
  */
 export function renderMessageWithoutLink({
   message,
@@ -45,8 +58,7 @@ export function renderMessageWithoutLink({
   message: string;
   commenterName?: string | null;
 }) {
-  return message
-    .replace(/\{username\}/gi, commenterName ?? "there")
+  return personalizeMessage(message, commenterName)
     .replace(/\s*\{link\}\s*/gi, " ")
     .trim();
 }
@@ -72,7 +84,7 @@ export function renderMessageWithTracking({
   trackedLinks?: MessageTrackedLink[];
   baseUrl?: string;
 }) {
-  let rendered = message.replace(/\{username\}/gi, commenterName ?? "there");
+  let rendered = personalizeMessage(message, commenterName);
   const primaryLink = trackedLinks?.[0];
 
   if (!primaryLink) return rendered;
