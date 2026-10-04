@@ -32,7 +32,7 @@ interface CampaignPreviewProps {
   openingDmMessage: string;
   openingDmButtonLabel: string;
   revealMessage: string;
-  hasVoiceNote: boolean;
+  hasVoiceNote?: boolean;
   hasLink: boolean;
   linkButtonLabel: string;
   linkUrl?: string;
@@ -317,7 +317,7 @@ function DmScreen({
   openingDmMessage,
   openingDmButtonLabel,
   revealMessage,
-  hasVoiceNote,
+  hasVoiceNote = false,
   hasLink,
   linkButtonLabel,
   hasSecondLink,
