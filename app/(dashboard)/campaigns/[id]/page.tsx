@@ -263,7 +263,7 @@ export default function CampaignDetailPage() {
         </Summary>
 
         {campaign.voiceNoteUrl && (
-          <Summary title={t("Voice note attached")}>
+          <Summary title="Voice note attached">
             <div className="rounded border border-success/30 bg-success/5 p-3">
               <p className="mb-2 text-sm font-medium text-success">✓ Voice note will be sent after the DM</p>
               <audio controls preload="metadata" src={campaign.voiceNoteUrl} className="h-9 w-full" />
