@@ -278,6 +278,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
         setOpeningDmButtonLabel(c.openingDmButtonLabel ?? "");
         setDmMessage(c.dmMessage);
         setVoiceNoteUrl(c.voiceNoteUrl ?? "");
+        setVoiceNoteName(c.voiceNoteUrl ? "Voice note attached" : "");
         setLinkButtonLabel(c.linkButtonLabel ?? "Open link");
         setIsActive(c.isActive);
         const link = c.trackedLinks?.[0]?.destinationUrl ?? "";
@@ -938,7 +939,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
               <input type="file" accept="audio/mpeg,audio/wav,audio/x-wav,audio/wave,audio/mp4,audio/x-m4a,audio/ogg,application/ogg,.mp3,.wav,.m4a,.oga,.ogg" disabled={voiceNoteUploading} onChange={async (e) => { const file=e.target.files?.[0]; if (!file) return; setVoiceNoteUploading(true); try { const body=new FormData(); body.append("file",file); const res=await fetch("/api/voice-notes",{method:"POST",body}); const data=await res.json(); if (!res.ok) throw new Error(data.error||"Upload failed"); setVoiceNoteUrl(data.url); setVoiceNoteName(data.name); } catch (error) { setError(error instanceof Error ? error.message : "Voice-note upload failed"); } finally { setVoiceNoteUploading(false); } }} className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-background" />
               {voiceNoteName && <p className="text-xs text-accent">{voiceNoteUploading ? "Uploading…" : `Attached: ${voiceNoteName}`}</p>}
               <input value={voiceNoteUrl} onChange={(e) => setVoiceNoteUrl(e.target.value)} placeholder="https://your-public-audio-url.com/voice-note.mp3" type="url" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-zinc-500 focus:border-accent/40 focus:outline-none" />
-              <p className="text-xs text-muted">Upload an MP3, WAV, M4A, OGA, or OGG file up to 10 MB, or paste a public HTTPS audio URL. OpenReply sends it after the text DM. Direct Meta connection is required.</p>
+              {voiceNoteUrl && (\n                <div className="rounded-md border border-accent/40 bg-background/40 p-2">\n                  <div className="mb-2 flex items-center justify-between gap-2 text-xs text-accent"><span>✓ Voice note attached</span><button type="button" onClick={() => { setVoiceNoteUrl(""); setVoiceNoteName(""); }} className="text-muted underline">Remove</button></div>\n                  <audio controls preload="metadata" src={voiceNoteUrl} className="h-9 w-full" />\n                </div>\n              )}\n              <p className="text-xs text-muted">Upload an MP3, WAV, M4A, OGA, or OGG file up to 10 MB, or paste a public HTTPS audio URL. OpenReply sends it after the text DM. Direct Meta connection is required.</p>
             </div>
           </div>
           <div className="mt-3 rounded-lg border border-border p-3">
@@ -1010,6 +1011,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
             openingDmMessage={openingDmMessage}
             openingDmButtonLabel={openingDmButtonLabel}
             revealMessage={dmMessage}
+            hasVoiceNote={Boolean(voiceNoteUrl)}
             hasLink={Boolean(trackedDestinationUrl.trim())}
             linkButtonLabel={linkButtonLabel || "Open link"}
             linkUrl={trackedDestinationUrl.trim() || undefined}
