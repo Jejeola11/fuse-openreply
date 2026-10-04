@@ -32,6 +32,7 @@ interface CampaignPreviewProps {
   openingDmMessage: string;
   openingDmButtonLabel: string;
   revealMessage: string;
+  hasVoiceNote: boolean;
   hasLink: boolean;
   linkButtonLabel: string;
   linkUrl?: string;
@@ -316,6 +317,7 @@ function DmScreen({
   openingDmMessage,
   openingDmButtonLabel,
   revealMessage,
+  hasVoiceNote,
   hasLink,
   linkButtonLabel,
   hasSecondLink,
@@ -335,6 +337,7 @@ function DmScreen({
   openingDmMessage: string;
   openingDmButtonLabel: string;
   revealMessage: string;
+  hasVoiceNote: boolean;
   hasLink: boolean;
   linkButtonLabel: string;
   linkUrl?: string;
@@ -446,7 +449,7 @@ function DmScreen({
             </div>
           );
         })()}
-        {followUpEnabled && (
+        {hasVoiceNote && (\n          <div className="flex items-end gap-2">\n            <Avatar url={avatarUrl} size={24} />\n            <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-zinc-800 px-3 py-2 text-sm"><span className="grid h-7 w-7 place-items-center rounded-full bg-accent text-black">▶</span><span>Voice message</span><span className="text-xs text-zinc-400">0:24</span></div>\n          </div>\n        )}\n        {followUpEnabled && (
           <>
             {followUpDelayMinutes > 0 && (
               <p className="py-1 text-center text-[11px] text-zinc-500">
@@ -524,6 +527,7 @@ export default function CampaignPreview(props: CampaignPreviewProps) {
             openingDmMessage={props.openingDmMessage}
             openingDmButtonLabel={props.openingDmButtonLabel}
             revealMessage={props.revealMessage}
+            hasVoiceNote={props.hasVoiceNote}
             hasLink={props.hasLink}
             linkButtonLabel={props.linkButtonLabel}
             hasSecondLink={props.hasSecondLink}
@@ -546,6 +550,7 @@ export default function CampaignPreview(props: CampaignPreviewProps) {
             openingDmMessage=""
             openingDmButtonLabel=""
             revealMessage={props.revealMessage}
+            hasVoiceNote={props.hasVoiceNote}
             hasLink={props.hasLink}
             linkButtonLabel={props.linkButtonLabel}
             hasSecondLink={props.hasSecondLink}
