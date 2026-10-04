@@ -449,7 +449,13 @@ function DmScreen({
             </div>
           );
         })()}
-        {hasVoiceNote && (\n          <div className="flex items-end gap-2">\n            <Avatar url={avatarUrl} size={24} />\n            <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-zinc-800 px-3 py-2 text-sm"><span className="grid h-7 w-7 place-items-center rounded-full bg-accent text-black">▶</span><span>Voice message</span><span className="text-xs text-zinc-400">0:24</span></div>\n          </div>\n        )}\n        {followUpEnabled && (
+        {hasVoiceNote && (
+          <div className="flex items-end gap-2">
+            <Avatar url={avatarUrl} size={24} />
+            <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-zinc-800 px-3 py-2 text-sm"><span className="grid h-7 w-7 place-items-center rounded-full bg-accent text-black">▶</span><span>Voice message</span><span className="text-xs text-zinc-400">0:24</span></div>
+          </div>
+        )}
+        {followUpEnabled && (
           <>
             {followUpDelayMinutes > 0 && (
               <p className="py-1 text-center text-[11px] text-zinc-500">
