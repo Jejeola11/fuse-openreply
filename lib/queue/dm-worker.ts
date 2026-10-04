@@ -1452,7 +1452,7 @@ async function recordWorkerFailure(
 
 export function createDMWorker(): Worker<DmQueueJob> {
   const worker = new Worker<DmQueueJob>("dm-processing", processJob, {
-    connection: getRedisConnection(),
+    connection: getRedisConnection() as never,
     concurrency: 5,
     settings: {
       backoffStrategy: (attemptsMade: number) =>
