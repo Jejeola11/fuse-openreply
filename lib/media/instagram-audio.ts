@@ -9,12 +9,8 @@ import { createClient } from "@supabase/supabase-js";
 const execFileAsync = promisify(execFile);
 const BUCKET = "openreply-voice-notes";
 
-/** Meta rejects Ogg/OGA headers for Instagram audio. Re-encode only those files
- * in the worker, where ffmpeg is installed, and keep MP3/WAV/M4A untouched. */
+/** Meta accepts a narrow set of audio encodings. Re-encode every upload in the\n * worker so the URL handed to Instagram is always a fresh MP3. */
 export async function getInstagramCompatibleAudioUrl(url: string): Promise<string> {
-  const looksLikeOgg = /\.(oga|ogg)(?:$|[?#])/i.test(url);
-  if (!looksLikeOgg) return url;
-
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) {
