@@ -394,6 +394,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
   async function handleSubmit(activeValue: boolean) {
     setError(null);
 
+    if (voiceNoteUploading) return setError("Please wait for the voice note to finish uploading.");
     if (!selectedAccountId) return setError(t("Connect an Instagram account first."));
     if (triggerScope === "specific" && !postId)
       return setError(t("Pick a post or reel to trigger the campaign."));
@@ -597,7 +598,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
             <button
               type="button"
               onClick={skipRow}
-              disabled={saving}
+              disabled={saving || voiceNoteUploading}
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted hover:text-foreground disabled:opacity-50"
             >
               {importQueue.length > 1 ? t("Skip") : t("Skip & finish")}
@@ -629,7 +630,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
             disabled={saving}
             className="rounded-lg bg-accent px-5 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
           >
-            {saving ? t("Saving…") : mode === "new" ? t("Go Live") : t("Save changes")}
+            {voiceNoteUploading ? "Uploading voice note…" : saving ? t("Saving…") : mode === "new" ? t("Go Live") : t("Save changes")}
           </button>
         </div>
       </div>
@@ -936,7 +937,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
             </p>
             <div className="mt-3 rounded-lg border border-border bg-surface/50 p-3 space-y-2">
               <label className="text-sm text-foreground">Optional voice note</label>
-              <input type="file" accept="audio/mpeg,audio/wav,audio/x-wav,audio/wave,audio/mp4,audio/x-m4a,audio/ogg,application/ogg,.mp3,.wav,.m4a,.oga,.ogg" disabled={voiceNoteUploading} onChange={async (e) => { const file=e.target.files?.[0]; if (!file) return; setVoiceNoteUploading(true); try { const body=new FormData(); body.append("file",file); const res=await fetch("/api/voice-notes",{method:"POST",body}); const data=await res.json(); if (!res.ok) throw new Error(data.error||"Upload failed"); setVoiceNoteUrl(data.url); setVoiceNoteName(data.name); } catch (error) { setError(error instanceof Error ? error.message : "Voice-note upload failed"); } finally { setVoiceNoteUploading(false); } }} className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-background" />
+              <input type="file" accept="audio/mpeg,audio/wav,audio/x-wav,audio/wave,audio/mp4,audio/x-m4a,audio/ogg,application/ogg,.mp3,.wav,.m4a,.oga,.ogg" disabled={voiceNoteUploading} onChange={async (e) => { const file=e.target.files?.[0]; if (!file) return; setError(null); setVoiceNoteUploading(true); try { const body=new FormData(); body.append("file",file); const res=await fetch("/api/voice-notes",{method:"POST",body}); const data=await res.json(); if (!res.ok) throw new Error(data.error||"Upload failed"); setVoiceNoteUrl(data.url); setVoiceNoteName(data.name); setError(null); } catch (error) { setError(error instanceof Error ? error.message : "Voice-note upload failed"); } finally { setVoiceNoteUploading(false); } }} className="block w-full text-sm text-muted file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-semibold file:text-background" />
               {voiceNoteName && <p className="text-xs text-accent">{voiceNoteUploading ? "Uploading…" : `Attached: ${voiceNoteName}`}</p>}
               <input value={voiceNoteUrl} onChange={(e) => setVoiceNoteUrl(e.target.value)} placeholder="https://your-public-audio-url.com/voice-note.mp3" type="url" className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-zinc-500 focus:border-accent/40 focus:outline-none" />
               {voiceNoteUrl && (
