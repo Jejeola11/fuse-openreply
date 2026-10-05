@@ -374,7 +374,9 @@ export async function sendDirectMessageWithAudio(
   const response = await fetch(`${instagramGraphBase()}/${instagramAccountId}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-    body: JSON.stringify({ recipient: { id: userId }, message: { attachment: { type: "audio", payload: { url: audioUrl } } } }),
+    // Mark the media reusable. This is the documented attachment-upload/send
+    // form and makes Meta fetch the public MP3 before accepting the message.
+    body: JSON.stringify({ recipient: { id: userId }, message: { attachment: { type: "audio", payload: { url: audioUrl, is_reusable: true } } } }),
   });
   return handleResponse(response);
 }
@@ -388,7 +390,7 @@ export async function sendPrivateReplyWithAudio(
   const response = await fetch(`${instagramGraphBase()}/${instagramAccountId}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-    body: JSON.stringify({ recipient: { comment_id: commentId }, message: { attachment: { type: "audio", payload: { url: audioUrl } } } }),
+    body: JSON.stringify({ recipient: { comment_id: commentId }, message: { attachment: { type: "audio", payload: { url: audioUrl, is_reusable: true } } } }),
   });
   return handleResponse(response);
 }
