@@ -627,7 +627,7 @@ export default function CampaignBuilder({ mode, campaignId }: CampaignBuilderPro
           <button
             type="button"
             onClick={() => handleSubmit(mode === "new" ? true : isActive)}
-            disabled={saving}
+            disabled={saving || voiceNoteUploading}
             className="rounded-lg bg-accent px-5 py-2 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
           >
             {voiceNoteUploading ? "Uploading voice note…" : saving ? t("Saving…") : mode === "new" ? t("Go Live") : t("Save changes")}
