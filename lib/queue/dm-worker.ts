@@ -1489,7 +1489,9 @@ async function recordWorkerFailure(
 
 export function createDMWorker(): Worker<DmQueueJob> {
   const worker = new Worker<DmQueueJob>("dm-processing", processJob, {
-    connection: getRedisConnection(),
+    // BullMQ and our Redis client can resolve separate ioredis type copies
+    // during a clean Railway install, despite being runtime-compatible.
+    connection: getRedisConnection() as never,
     concurrency: 5,
     settings: {
       backoffStrategy: (attemptsMade: number) =>
