@@ -169,7 +169,7 @@ async function sendRevealDirectMessage({
     });
     if (automation.voiceNoteUrl) {
       console.log("[DM Worker] Preparing voice note after reveal", {
-        automationId: automation.id,
+        campaignHasVoiceNote: true,
         userId,
         context,
       });
@@ -181,7 +181,7 @@ async function sendRevealDirectMessage({
         audioUrl,
       });
       console.log("[DM Worker] Voice note accepted by Instagram", {
-        automationId: automation.id,
+        campaignHasVoiceNote: true,
         userId,
         messageId: result.message_id,
       });
@@ -235,7 +235,7 @@ async function sendRevealDirectMessage({
   }
   if (automation.voiceNoteUrl) {
     console.log("[DM Worker] Preparing voice note after reveal", {
-      automationId: automation.id,
+      campaignHasVoiceNote: true,
       userId,
       context,
     });
@@ -247,7 +247,7 @@ async function sendRevealDirectMessage({
       audioUrl,
     });
     console.log("[DM Worker] Voice note accepted by Instagram", {
-      automationId: automation.id,
+      campaignHasVoiceNote: true,
       userId,
       messageId: result.message_id,
     });
