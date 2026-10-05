@@ -167,7 +167,25 @@ async function sendRevealDirectMessage({
         trackedLinks: automation.trackedLinks,
       }),
     });
-    if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl) });
+    if (automation.voiceNoteUrl) {
+      console.log("[DM Worker] Preparing voice note after reveal", {
+        automationId: automation.id,
+        userId,
+        context,
+      });
+      const audioUrl = await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl);
+      const result = await sendDirectMessageWithAudio({
+        context: accessToken,
+        instagramAccountId: automation.instagramAccount.instagramId,
+        userId,
+        audioUrl,
+      });
+      console.log("[DM Worker] Voice note accepted by Instagram", {
+        automationId: automation.id,
+        userId,
+        messageId: result.message_id,
+      });
+    }
     return;
   }
 
@@ -215,7 +233,25 @@ async function sendRevealDirectMessage({
       throw buttonError;
     }
   }
-  if (automation.voiceNoteUrl) await sendDirectMessageWithAudio({ context: accessToken, instagramAccountId: automation.instagramAccount.instagramId, userId, audioUrl: await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl) });
+  if (automation.voiceNoteUrl) {
+    console.log("[DM Worker] Preparing voice note after reveal", {
+      automationId: automation.id,
+      userId,
+      context,
+    });
+    const audioUrl = await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl);
+    const result = await sendDirectMessageWithAudio({
+      context: accessToken,
+      instagramAccountId: automation.instagramAccount.instagramId,
+      userId,
+      audioUrl,
+    });
+    console.log("[DM Worker] Voice note accepted by Instagram", {
+      automationId: automation.id,
+      userId,
+      messageId: result.message_id,
+    });
+  }
 }
 
 
@@ -1453,7 +1489,7 @@ async function recordWorkerFailure(
 
 export function createDMWorker(): Worker<DmQueueJob> {
   const worker = new Worker<DmQueueJob>("dm-processing", processJob, {
-    connection: getRedisConnection() as never,
+    connection: getRedisConnection(),
     concurrency: 5,
     settings: {
       backoffStrategy: (attemptsMade: number) =>
