@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   if (file.size > 10 * 1024 * 1024) return NextResponse.json({ error: "Voice notes must be 10 MB or smaller." }, { status: 400 });
   const contentType =
     ext === "oga" || ext === "ogg"
-      ? "audio/ogg"
+      ? "audio/mpeg"
       : file.type || "application/octet-stream";
   const path = `${workspaceId}/${crypto.randomUUID()}.${ext}`;
   const supabase = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
