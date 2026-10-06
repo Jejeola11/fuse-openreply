@@ -856,9 +856,13 @@ async function sendPostbackOnce({
  */
 async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
   const { instagramAccountId, userId, payload, fallback } = job.data;
+  console.log("[DM Worker] Postback received", { jobId: job.id, instagramAccountId, userId, payload, fallback: Boolean(fallback) });
 
   const isFollowCheck = payload.startsWith("followcheck:");
-  if (!isFollowCheck && !payload.startsWith("reveal:")) return;
+  if (!isFollowCheck && !payload.startsWith("reveal:")) {
+    console.warn("[DM Worker] Ignoring unsupported postback payload", { jobId: job.id, payload });
+    return;
+  }
   const automationId = payload.slice(
     isFollowCheck ? "followcheck:".length : "reveal:".length,
   );
@@ -875,11 +879,11 @@ async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
     },
   });
 
-  if (
-    !automation ||
-    automation.instagramAccount.instagramId !== instagramAccountId ||
-    !hasInstagramCredentials(automation.instagramAccount)
-  ) {
+  const accountMatches = Boolean(automation && automation.instagramAccount.instagramId === instagramAccountId);
+  const hasCredentials = Boolean(automation && hasInstagramCredentials(automation.instagramAccount));
+  console.log("[DM Worker] Postback campaign lookup", { jobId: job.id, automationId, found: Boolean(automation), active: Boolean(automation?.isActive), accountMatches, hasCredentials, provider: automation?.instagramAccount.provider ?? null });
+  if (!automation || !accountMatches || !hasCredentials) {
+    console.warn("[DM Worker] Postback stopped before reveal", { jobId: job.id, automationId, reason: !automation ? "campaign missing or inactive" : !accountMatches ? "Instagram account mismatch" : "credentials unavailable" });
     return;
   }
 
@@ -916,7 +920,8 @@ async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
       automation.instagramAccount,
       `${job.id}:${automation.id}`,
     );
-  } catch {
+  } catch (error) {
+    console.error("[DM Worker] Postback token/context creation failed", { jobId: job.id, automationId, error: formatError(error) });
     return;
   }
 
@@ -1006,6 +1011,7 @@ async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
     return;
   }
 
+  console.log("[DM Worker] Attempting reveal send", { jobId: job.id, automationId, provider: accessToken.provider, isFollowCheck, fallback: Boolean(fallback), hasVoiceNote: Boolean(automation.voiceNoteUrl) });
   try {
     const delivered = await sendPostbackOnce({
       operationId,
@@ -1076,6 +1082,7 @@ async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
       update: { status: "SENT", dmSentAt: new Date(), errorMessage: null },
     });
   } catch (error) {
+    console.error("[DM Worker] Reveal/postback send failed", { jobId: job.id, automationId, provider: accessToken.provider, error: formatError(error) });
     await releaseWorkspaceDMReservation(
       automation.workspaceId,
       usage.periodStart,
