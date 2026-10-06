@@ -193,12 +193,14 @@ async function sendRevealDirectMessage({
   userId,
   commenterName,
   context,
+  sendAudio = true,
 }: {
   accessToken: InstagramContext;
   automation: RevealAutomation;
   userId: string;
   commenterName: string | null;
   context: string;
+  sendAudio?: boolean;
 }): Promise<void> {
   if (automation.trackedLinks.length === 0) {
     await sendDirectMessage({
@@ -211,7 +213,7 @@ async function sendRevealDirectMessage({
         trackedLinks: automation.trackedLinks,
       }),
     });
-    await sendRevealVoiceNote({ accessToken, automation, userId, context });
+    if (sendAudio) await sendRevealVoiceNote({ accessToken, automation, userId, context });
     return;
   }
 
@@ -259,7 +261,7 @@ async function sendRevealDirectMessage({
       throw buttonError;
     }
   }
-  await sendRevealVoiceNote({ accessToken, automation, userId, context });
+  if (sendAudio) await sendRevealVoiceNote({ accessToken, automation, userId, context });
 }
 
 
@@ -751,7 +753,7 @@ async function processComment(job: Job<ProcessCommentJob>): Promise<void> {
         });
       }
 
-      if (automation.voiceNoteUrl) {
+      if (automation.voiceNoteUrl && !useOpeningDm && !sendFollowPrompt) {
         await sendPrivateReplyWithAudio({
           context: accessToken,
           instagramAccountId: automation.instagramAccount.instagramId,
@@ -1010,8 +1012,16 @@ async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
           userId: userId,
           commenterName: commenterName,
           context: "postback",
+          sendAudio: false,
         }),
     });
+    console.log("[DM Worker] Postback text status", { automationId: automation.id, provider: accessToken.provider, delivered, hasVoiceNote: Boolean(automation.voiceNoteUrl) });
+    if (automation.voiceNoteUrl) {
+      await sendPostbackOnce({
+        operationId: operationId ? `${operationId}:audio` : null,
+        send: () => sendRevealVoiceNote({ accessToken, automation, userId, context: "postback audio" }),
+      });
+    }
     if (!delivered) {
       await releaseWorkspaceDMReservation(
         automation.workspaceId,
