@@ -1026,7 +1026,19 @@ async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
         }),
     });
     console.log("[DM Worker] Postback text status", { automationId: automation.id, provider: accessToken.provider, delivered, hasVoiceNote: Boolean(automation.voiceNoteUrl) });
-    if (automation.voiceNoteUrl) {
+    const latestVoiceNote = await prisma.automation.findUnique({
+      where: { id: automation.id },
+      select: { voiceNoteUrl: true },
+    });
+    const hasLatestVoiceNote = Boolean(latestVoiceNote?.voiceNoteUrl || automation.voiceNoteUrl);
+    console.log("[DM Worker] Postback audio eligibility", {
+      jobId: job.id,
+      automationId: automation.id,
+      hasInitialVoiceNote: Boolean(automation.voiceNoteUrl),
+      hasLatestVoiceNote,
+      provider: accessToken.provider,
+    });
+    if (hasLatestVoiceNote) {
       await sendPostbackOnce({
         operationId: operationId ? `${operationId}:audio` : null,
         send: () => sendRevealVoiceNote({ accessToken, automation, userId, context: "postback audio" }),
@@ -1529,7 +1541,7 @@ export function createDMWorker(): Worker<DmQueueJob> {
   });
 
   worker.on("completed", (job) => {
-    console.log(`[DM Worker] Job ${job.id} completed`);
+    console.log(`[DM Worker] Job ${job.id} (${job.name}) completed`);
   });
 
   worker.on("failed", (job, err) => {
