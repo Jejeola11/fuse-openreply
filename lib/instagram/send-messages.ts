@@ -224,7 +224,7 @@ export async function sendDirectMessageWithAudio({ context, instagramAccountId, 
     method: "POST",
     body: { accountId: context.accountId, attachmentType: "audio", attachmentUrl: audioUrl },
     idempotencyKey: createHash("sha256")
-      .update(JSON.stringify({ operationId: context.operationId, userId, audioUrl, type: "audio" }))
+      .update(JSON.stringify({ operationId: context.operationId, userId, type: "audio" }))
       .digest("hex"),
   });
   const messageId = result?.messageId ?? result?.data?.messageId;
