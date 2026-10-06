@@ -131,12 +131,56 @@ function buildInlineLinkFallback(
 }
 
 type RevealAutomation = {
+  id: string;
   dmMessage: string;
   voiceNoteUrl: string | null;
   linkButtonLabel: string | null;
   trackedLinks: WorkerTrackedLink[];
   instagramAccount: { instagramId: string };
 };
+
+/**
+ * Re-read the attachment immediately before the media send. This deliberately
+ * avoids trusting an earlier campaign object when a creator has just saved a
+ * voice note and then tests the button straight away.
+ */
+async function sendRevealVoiceNote({
+  accessToken,
+  automation,
+  userId,
+  context,
+}: {
+  accessToken: InstagramContext;
+  automation: RevealAutomation;
+  userId: string;
+  context: string;
+}) {
+  const latest = await prisma.automation.findUnique({
+    where: { id: automation.id },
+    select: { voiceNoteUrl: true },
+  });
+  const voiceNoteUrl = latest?.voiceNoteUrl || automation.voiceNoteUrl;
+  console.log("[DM Worker] Reveal voice-note check", {
+    automationId: automation.id,
+    hasVoiceNote: Boolean(voiceNoteUrl),
+    userId,
+    context,
+  });
+  if (!voiceNoteUrl) return;
+
+  const audioUrl = await getInstagramCompatibleAudioUrl(voiceNoteUrl);
+  const result = await sendDirectMessageWithAudio({
+    context: accessToken,
+    instagramAccountId: automation.instagramAccount.instagramId,
+    userId,
+    audioUrl,
+  });
+  console.log("[DM Worker] Voice note accepted by Instagram", {
+    automationId: automation.id,
+    userId,
+    messageId: result.message_id,
+  });
+}
 
 /**
  * Deliver a campaign's reveal message as a direct message. Shared by the
@@ -167,25 +211,7 @@ async function sendRevealDirectMessage({
         trackedLinks: automation.trackedLinks,
       }),
     });
-    if (automation.voiceNoteUrl) {
-      console.log("[DM Worker] Preparing voice note after reveal", {
-        campaignHasVoiceNote: true,
-        userId,
-        context,
-      });
-      const audioUrl = await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl);
-      const result = await sendDirectMessageWithAudio({
-        context: accessToken,
-        instagramAccountId: automation.instagramAccount.instagramId,
-        userId,
-        audioUrl,
-      });
-      console.log("[DM Worker] Voice note accepted by Instagram", {
-        campaignHasVoiceNote: true,
-        userId,
-        messageId: result.message_id,
-      });
-    }
+    await sendRevealVoiceNote({ accessToken, automation, userId, context });
     return;
   }
 
@@ -233,25 +259,7 @@ async function sendRevealDirectMessage({
       throw buttonError;
     }
   }
-  if (automation.voiceNoteUrl) {
-    console.log("[DM Worker] Preparing voice note after reveal", {
-      campaignHasVoiceNote: true,
-      userId,
-      context,
-    });
-    const audioUrl = await getInstagramCompatibleAudioUrl(automation.voiceNoteUrl);
-    const result = await sendDirectMessageWithAudio({
-      context: accessToken,
-      instagramAccountId: automation.instagramAccount.instagramId,
-      userId,
-      audioUrl,
-    });
-    console.log("[DM Worker] Voice note accepted by Instagram", {
-      campaignHasVoiceNote: true,
-      userId,
-      messageId: result.message_id,
-    });
-  }
+  await sendRevealVoiceNote({ accessToken, automation, userId, context });
 }
 
 
