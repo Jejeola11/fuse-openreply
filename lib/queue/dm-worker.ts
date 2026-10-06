@@ -940,7 +940,11 @@ async function processPostback(job: Job<ProcessPostbackJob>): Promise<void> {
   // be bypassable by just reading the DM and waiting. Following, or
   // unverifiable (null), falls through and delivers the link — fail-open so a
   // real follower is never trapped.
-  if ((isFollowCheck || fallback) && automation.requireFollow) {
+  // A follow-check button is the user's explicit confirmation; trust that
+  // confirmation instead of re-querying a provider that can return stale false
+  // values and trap the person in a loop. Only the speculative read fallback
+  // still requires an API follow lookup.
+  if (fallback && automation.requireFollow) {
     const follows = await getUserFollowStatus({
       context: accessToken,
       recipientId: userId,
