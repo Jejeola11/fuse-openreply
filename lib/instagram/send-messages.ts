@@ -217,8 +217,19 @@ export async function sendDirectMessage({
 }
 
 export async function sendDirectMessageWithAudio({ context, instagramAccountId, userId, audioUrl }: { context: InstagramContext; instagramAccountId: string; userId: string; audioUrl: string }) {
-  if (context.provider !== "META") throw new Error("Voice notes currently require a direct Meta Instagram connection.");
-  return meta.sendDirectMessageWithAudio(context.accessToken, instagramAccountId, userId, audioUrl);
+  if (context.provider === "META") return meta.sendDirectMessageWithAudio(context.accessToken, instagramAccountId, userId, audioUrl);
+  const result = await zernioRequest<{ messageId?: string; data?: { messageId?: string } }>({
+    apiKey: context.apiKey,
+    path: `/inbox/conversations/${encodeURIComponent(userId)}/messages`,
+    method: "POST",
+    body: { accountId: context.accountId, attachmentType: "audio", attachmentUrl: audioUrl },
+    idempotencyKey: createHash("sha256")
+      .update(JSON.stringify({ operationId: context.operationId, userId, audioUrl, type: "audio" }))
+      .digest("hex"),
+  });
+  const messageId = result?.messageId ?? result?.data?.messageId;
+  if (!messageId) throw new ZernioDeliveryUnconfirmedError();
+  return { message_id: messageId, recipient_id: userId };
 }
 
 export async function sendPrivateReplyWithAudio({ context, instagramAccountId, commentId, audioUrl }: { context: InstagramContext; instagramAccountId: string; commentId: string; audioUrl: string }) {
